@@ -1,0 +1,106 @@
+package com.example.admin.materialdesignrecyclerview;
+
+import android.app.Application;
+import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.Inflater;
+
+/**
+ * Created by Admin on 23-11-2017.
+ */
+
+public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.MyViewHolder> implements Filterable{
+
+    private final Context context;
+    private ArrayList<Contact> mArrayList;
+    private ArrayList<Contact> mFilteredList;
+
+
+    public ContactAdapter(ArrayList<Contact> arrayList,Context context) {
+        mArrayList = arrayList;
+        mFilteredList = arrayList;
+        this.context = context;
+    }
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+        private final TextView  tv_name, tv_phone;
+        private final ImageView tv_image;
+
+        public MyViewHolder(View itemView) {
+            super(itemView);
+
+            tv_image = (ImageView) itemView.findViewById(R.id.thumbnail);
+            tv_name = (TextView) itemView.findViewById(R.id.name);
+            tv_phone = (TextView) itemView.findViewById(R.id.phone);
+
+        }
+    }
+    @Override
+    public ContactAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_row_item,parent,false);
+
+        MyViewHolder holder = new MyViewHolder(view);
+        return holder;
+    }
+    @Override
+    public void onBindViewHolder(ContactAdapter.MyViewHolder holder, int position) {
+
+        holder.tv_name.setText(mFilteredList.get(position).getName());
+        holder.tv_phone.setText(mFilteredList.get(position).getPhone());
+
+        Picasso.with(context).load(mFilteredList.get(position).getImage()).into(holder.tv_image);
+    }
+    @Override
+    public int getItemCount() {
+        return mFilteredList.size();
+    }
+    @Override
+    public Filter getFilter() {
+
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+
+                String charString = charSequence.toString();
+                if (charString.isEmpty())
+                {
+                    mFilteredList = mArrayList;
+                } else {
+                    ArrayList<Contact> filteredList = new ArrayList<>();
+
+                    for (Contact androidVersion : mArrayList)
+                    {
+                        if (androidVersion.getName().toLowerCase().contains(charString) || androidVersion.getPhone().toLowerCase().contains(charString))
+                        {
+                            filteredList.add(androidVersion);
+                        }
+                    }
+                    mFilteredList = filteredList;
+                }
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = mFilteredList;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                mFilteredList = (ArrayList<Contact>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
+    }
+
+}
